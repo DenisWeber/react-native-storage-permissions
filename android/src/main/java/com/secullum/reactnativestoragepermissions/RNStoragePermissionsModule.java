@@ -12,39 +12,36 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
-import com.facebook.react.bridge.Callback;
 
 public class RNStoragePermissionsModule extends ReactContextBaseJavaModule implements ActivityEventListener {
-  private final ReactApplicationContext reactContext;
+    private final ReactApplicationContext reactContext;
 
-  private static final int STORAGE_PERMISSION_CODE = 1;
-  private Promise m_StoragePermissionPromise;
+    private static final int STORAGE_PERMISSION_CODE = 1;
+    private Promise m_StoragePermissionPromise;
 
-  public RNStoragePermissionsModule(ReactApplicationContext reactContext) {
-    super(reactContext);
-    this.reactContext = reactContext;
-    this.reactContext.addActivityEventListener(this);
-  }
+    public RNStoragePermissionsModule(ReactApplicationContext reactContext) {
+        super(reactContext);
+        this.reactContext = reactContext;
+        this.reactContext.addActivityEventListener(this);
+    }
 
-  @Override
-  public String getName() {
-    return "RNStoragePermissions";
-  }
+    @Override
+    public String getName() {
+        return "RNStoragePermissions";
+    }
 
-  @ReactMethod
+    @ReactMethod
     public void checkStoragePermissionsAsync(Promise promise) {
-        m_StoragePermissionPromise = promise;
-      
         try {
             if (Build.VERSION.SDK_INT < 30) {
-                m_StoragePermissionPromise.reject(new Error("SDK version less than 30"));
+                promise.reject(new Error("SDK version less than 30"));
                 return;
             }
 
             boolean managePermissionResult = Environment.isExternalStorageManager();
-            m_StoragePermissionPromise.resolve(managePermissionResult);
+            promise.resolve(managePermissionResult);
         } catch (Exception e) {
-            m_StoragePermissionPromise.reject(e);
+            promise.reject(e);
         }
     }
 
@@ -70,17 +67,17 @@ public class RNStoragePermissionsModule extends ReactContextBaseJavaModule imple
     @Override
     public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
         try {
-          if (requestCode == STORAGE_PERMISSION_CODE) {
-              if (Build.VERSION.SDK_INT < 30) {
-                  m_StoragePermissionPromise.reject(new Error("SDK version less than 30"));
-                  return;
-              }
+            if (requestCode == STORAGE_PERMISSION_CODE) {
+                if (Build.VERSION.SDK_INT < 30) {
+                    m_StoragePermissionPromise.reject(new Error("SDK version less than 30"));
+                    return;
+                }
 
-              boolean hasStoragePermissions = Environment.isExternalStorageManager();
-              m_StoragePermissionPromise.resolve(hasStoragePermissions);
-          }
+                boolean hasStoragePermissions = Environment.isExternalStorageManager();
+                m_StoragePermissionPromise.resolve(hasStoragePermissions);
+            }
         } catch (Exception e) {
-              m_StoragePermissionPromise.reject(e);
+            m_StoragePermissionPromise.reject(e);
         }
     }
 
